@@ -232,7 +232,7 @@ func (s *RediStore) Get(r *http.Request, name string) (*sessions.Session, error)
 func (s *RediStore) New(r *http.Request, name string) (*sessions.Session, error) {
 	var (
 		err error
-		// ok  bool
+		ok  bool
 	)
 	session := sessions.NewSession(s, name)
 	// make a copy
@@ -241,7 +241,8 @@ func (s *RediStore) New(r *http.Request, name string) (*sessions.Session, error)
 	session.IsNew = true
 	if c, errCookie := r.Cookie(name); errCookie == nil {
 		session.ID = c.Value
-		session.IsNew = false
+		ok, err = s.load(session)
+		session.IsNew = !(err == nil && ok)
 		// err = securecookie.DecodeMulti(name, c.Value, &session.ID, s.Codecs...)
 		// if err == nil {
 		// 	ok, err = s.load(session)

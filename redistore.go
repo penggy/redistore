@@ -6,14 +6,14 @@ package redistore
 
 import (
 	"bytes"
-	"encoding/base32"
 	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
+
+	"github.com/teris-io/shortid"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/securecookie"
@@ -260,16 +260,17 @@ func (s *RediStore) Save(r *http.Request, w http.ResponseWriter, session *sessio
 	} else {
 		// Build an alphanumeric key for the redis store.
 		if session.ID == "" {
-			session.ID = strings.TrimRight(base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32)), "=")
+			// session.ID = strings.TrimRight(base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32)), "=")
+			session.ID = shortid.MustGenerate()
 		}
 		if err := s.save(session); err != nil {
 			return err
 		}
-		encoded, err := securecookie.EncodeMulti(session.Name(), session.ID, s.Codecs...)
-		if err != nil {
-			return err
-		}
-		http.SetCookie(w, sessions.NewCookie(session.Name(), encoded, session.Options))
+		// encoded, err := securecookie.EncodeMulti(session.Name(), session.ID, s.Codecs...)
+		// if err != nil {
+		// 	return err
+		// }
+		http.SetCookie(w, sessions.NewCookie(session.Name(), session.ID, session.Options))
 	}
 	return nil
 }

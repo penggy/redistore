@@ -248,6 +248,8 @@ func (s *RediStore) New(r *http.Request, name string) (*sessions.Session, error)
 		// 	ok, err = s.load(session)
 		// 	session.IsNew = !(err == nil && ok) // not new if no error and data available
 		// }
+	} else {
+		session.ID = shortid.MustGenerate()
 	}
 	return session, err
 }
